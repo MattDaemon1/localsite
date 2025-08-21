@@ -70,4 +70,9 @@ export const MODELS = [
     providers: ["together", "novita", "groq"],
     autoProvider: "groq",
   },
+  {
+    value: "deepseek-ai/DeepSeek-V3.1-Base",
+    label: "DeepSeek V3.1 Base",
+    providers: ["novita"]
+  }
 ];
