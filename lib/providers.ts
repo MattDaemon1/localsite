@@ -62,7 +62,6 @@ export const MODELS = [
     label: "Qwen3 Coder 480B A35B Instruct",
     providers: ["novita", "hyperbolic"],
     autoProvider: "novita",
-    isNew: true,
   },
   {
     value: "moonshotai/Kimi-K2-Instruct",
@@ -73,6 +72,7 @@ export const MODELS = [
   {
     value: "deepseek-ai/DeepSeek-V3.1-Base",
     label: "DeepSeek V3.1 Base",
-    providers: ["novita"]
+    providers: ["novita"],
+    isNew: true,
   }
 ];
