@@ -70,10 +70,10 @@ export const MODELS = [
     autoProvider: "groq",
   },
   {
-    value: "deepseek-ai/DeepSeek-V3.1-Base",
-    label: "DeepSeek V3.1 Base",
-    providers: ["novita"],
+    value: "deepseek-ai/DeepSeek-V3.1",
+    label: "DeepSeek V3.1",
+    providers: ["fireworks-ai"],
     isNew: true,
-    autoProvider: "novita"
+    autoProvider: "fireworks-ai"
   }
 ];
