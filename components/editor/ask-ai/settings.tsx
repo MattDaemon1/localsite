@@ -81,15 +81,15 @@ export function Settings({
             )}
             <label className="block">
               <p className="text-neutral-300 text-sm mb-2.5">
-                Choose a DeepSeek model
+                Choose a model
               </p>
               <Select defaultValue={model} onValueChange={onModelChange}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a DeepSeek model" />
+                  <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>DeepSeek models</SelectLabel>
+                    <SelectLabel>Models</SelectLabel>
                     {MODELS.map(
                       ({
                         value,
