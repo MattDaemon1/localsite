@@ -74,5 +74,6 @@ export const MODELS = [
     label: "DeepSeek V3.1 Base",
     providers: ["novita"],
     isNew: true,
+    autoProvider: "novita"
   }
 ];
