@@ -72,8 +72,8 @@ export const MODELS = [
   {
     value: "deepseek-ai/DeepSeek-V3.1",
     label: "DeepSeek V3.1",
-    providers: ["fireworks-ai"],
+    providers: ["fireworks-ai", "novita"],
     isNew: true,
-    autoProvider: "fireworks-ai"
+    autoProvider: "novita"
   }
 ];
