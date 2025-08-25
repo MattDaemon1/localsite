@@ -11,6 +11,9 @@ short_description: Generate any application with DeepSeek
 models:
   - deepseek-ai/DeepSeek-V3-0324
   - deepseek-ai/DeepSeek-R1-0528
+  - deepseek-ai/DeepSeek-V3.1
+  - Qwen/Qwen3-Coder-480B-A35B-Instruct
+  - moonshotai/Kimi-K2-Instruct
 ---
 
 # DeepSite 🐳
