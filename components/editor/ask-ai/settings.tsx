@@ -128,81 +128,83 @@ export function Settings({
                 </SelectContent>
               </Select>
             </label>
-            {isFollowUp && (
+            {isFollowUp && !isLocalMode && (
               <div className="bg-amber-500/10 border-amber-500/10 p-3 text-xs text-amber-500 border rounded-lg">
                 Note: You can&apos;t use a Thinker model for follow-up requests.
                 We automatically switch to the default model for you.
               </div>
             )}
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-neutral-300 text-sm mb-1.5">
-                    Use auto-provider
-                  </p>
-                  <p className="text-xs text-neutral-400/70">
-                    We&apos;ll automatically select the best provider for you
-                    based on your prompt.
-                  </p>
-                </div>
-                <div
-                  className={classNames(
-                    "bg-neutral-700 rounded-full min-w-10 w-10 h-6 flex items-center justify-between p-1 cursor-pointer transition-all duration-200",
-                    {
-                      "!bg-sky-500": provider === "auto",
-                    }
-                  )}
-                  onClick={() => {
-                    const foundModel = MODELS.find(
-                      (m: { value: string }) => m.value === model
-                    );
-                    if (provider === "auto" && foundModel?.autoProvider) {
-                      onChange(foundModel.autoProvider);
-                    } else {
-                      onChange("auto");
-                    }
-                  }}
-                >
+            {!isLocalMode && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-neutral-300 text-sm mb-1.5">
+                      Use auto-provider
+                    </p>
+                    <p className="text-xs text-neutral-400/70">
+                      We&apos;ll automatically select the best provider for you
+                      based on your prompt.
+                    </p>
+                  </div>
                   <div
                     className={classNames(
-                      "w-4 h-4 rounded-full shadow-md transition-all duration-200 bg-neutral-200",
+                      "bg-neutral-700 rounded-full min-w-10 w-10 h-6 flex items-center justify-between p-1 cursor-pointer transition-all duration-200",
                       {
-                        "translate-x-4": provider === "auto",
+                        "!bg-sky-500": provider === "auto",
                       }
                     )}
-                  />
-                </div>
-              </div>
-              <label className="block">
-                <p className="text-neutral-300 text-sm mb-2">
-                  Inference Provider
-                </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {modelAvailableProviders.map((id: string) => (
-                    <Button
-                      key={id}
-                      variant={id === provider ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => {
-                        onChange(id);
-                      }}
-                    >
-                      <Image
-                        src={`/providers/${id}.svg`}
-                        alt={PROVIDERS[id as keyof typeof PROVIDERS].name}
-                        className="size-5 mr-2"
-                        width={20}
-                        height={20}
-                      />
-                      {PROVIDERS[id as keyof typeof PROVIDERS].name}
-                      {id === provider && (
-                        <RiCheckboxCircleFill className="ml-2 size-4 text-blue-500" />
+                    onClick={() => {
+                      const foundModel = MODELS.find(
+                        (m: { value: string }) => m.value === model
+                      );
+                      if (provider === "auto" && foundModel?.autoProvider) {
+                        onChange(foundModel.autoProvider);
+                      } else {
+                        onChange("auto");
+                      }
+                    }}
+                  >
+                    <div
+                      className={classNames(
+                        "w-4 h-4 rounded-full shadow-md transition-all duration-200 bg-neutral-200",
+                        {
+                          "translate-x-4": provider === "auto",
+                        }
                       )}
-                    </Button>
-                  ))}
+                    />
+                  </div>
                 </div>
-              </label>
-            </div>
+                <label className="block">
+                  <p className="text-neutral-300 text-sm mb-2">
+                    Inference Provider
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {modelAvailableProviders.map((id: string) => (
+                      <Button
+                        key={id}
+                        variant={id === provider ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => {
+                          onChange(id);
+                        }}
+                      >
+                        <Image
+                          src={`/providers/${id}.svg`}
+                          alt={PROVIDERS[id as keyof typeof PROVIDERS].name}
+                          className="size-5 mr-2"
+                          width={20}
+                          height={20}
+                        />
+                        {PROVIDERS[id as keyof typeof PROVIDERS].name}
+                        {id === provider && (
+                          <RiCheckboxCircleFill className="ml-2 size-4 text-blue-500" />
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                </label>
+              </div>
+            )}
           </main>
         </PopoverContent>
       </Popover>

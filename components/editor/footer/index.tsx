@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FaMobileAlt } from "react-icons/fa";
-import { HelpCircle, RefreshCcw, SparkleIcon } from "lucide-react";
+import { HelpCircle, RefreshCcw, SparkleIcon, Download } from "lucide-react";
 import { FaLaptopCode } from "react-icons/fa6";
 import { HtmlHistory } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { MdAdd } from "react-icons/md";
 import { History } from "@/components/editor/history";
 import { UserMenu } from "@/components/user-menu";
 import { useUser } from "@/hooks/useUser";
+import { downloadProjectAsZip } from "@/lib/download-utils";
+import { toast } from "sonner";
 
 const DEVICES = [
   {
@@ -27,6 +29,7 @@ export function Footer({
   device,
   setDevice,
   iframeRef,
+  currentHtml,
 }: {
   onReset: () => void;
   htmlHistory?: HtmlHistory[];
@@ -34,6 +37,7 @@ export function Footer({
   setHtml: (html: string) => void;
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
   setDevice: React.Dispatch<React.SetStateAction<"desktop" | "mobile">>;
+  currentHtml?: string;
 }) {
   const { user } = useUser();
 
@@ -45,6 +49,22 @@ export function Footer({
       setTimeout(() => {
         iframe.srcdoc = content;
       }, 10);
+    }
+  };
+
+  const handleDownloadProject = async () => {
+    if (!currentHtml || currentHtml.trim() === '') {
+      toast.error('No project to download. Generate some content first!');
+      return;
+    }
+    
+    try {
+      const projectName = `localsite-project-${new Date().toISOString().split('T')[0]}`;
+      await downloadProjectAsZip(currentHtml, projectName);
+      toast.success('Project downloaded successfully! 📦');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download project. Please try again.');
     }
   };
 
@@ -80,7 +100,7 @@ export function Footer({
         >
           <Button size="sm" variant="ghost">
             <SparkleIcon className="size-3.5" />
-            <span className="max-lg:hidden">DeepSite Gallery</span>
+            <span className="max-lg:hidden">LocalSite Gallery</span>
           </Button>
         </a>
         <a
@@ -95,6 +115,10 @@ export function Footer({
         <Button size="sm" variant="outline" onClick={handleRefreshIframe}>
           <RefreshCcw className="size-3.5" />
           <span className="max-lg:hidden">Refresh Preview</span>
+        </Button>
+        <Button size="sm" variant="default" onClick={handleDownloadProject}>
+          <Download className="size-3.5" />
+          <span className="max-lg:hidden">Download ZIP</span>
         </Button>
         <div className="flex items-center rounded-full p-0.5 bg-neutral-700/70 relative overflow-hidden z-0 max-lg:hidden gap-0.5">
           <div

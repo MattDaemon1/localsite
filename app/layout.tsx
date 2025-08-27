@@ -23,34 +23,34 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "DeepSite | Build with AI ✨",
+  title: "LocalSite | Build locally with AI ✨",
   description:
-    "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
+    "LocalSite is a 100% local web development tool powered by Ollama. Build websites with AI running directly on your machine, no cloud required.",
   openGraph: {
-    title: "DeepSite | Build with AI ✨",
+    title: "LocalSite | Build locally with AI ✨",
     description:
-      "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    url: "https://deepsite.hf.co",
-    siteName: "DeepSite",
+      "LocalSite is a 100% local web development tool powered by Ollama. Build websites with AI running directly on your machine, no cloud required.",
+    url: "http://localhost:3001",
+    siteName: "LocalSite",
     images: [
       {
-        url: "https://deepsite.hf.co/banner.png",
+        url: "/banner.png",
         width: 1200,
         height: 630,
-        alt: "DeepSite Open Graph Image",
+        alt: "LocalSite Open Graph Image",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DeepSite | Build with AI ✨",
+    title: "LocalSite | Build locally with AI ✨",
     description:
-      "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    images: ["https://deepsite.hf.co/banner.png"],
+      "LocalSite is a 100% local web development tool powered by Ollama. Build websites with AI running directly on your machine, no cloud required.",
+    images: ["/banner.png"],
   },
   appleWebApp: {
     capable: true,
-    title: "DeepSite",
+    title: "LocalSite",
     statusBarStyle: "black-translucent",
   },
   icons: {
@@ -90,11 +90,6 @@ export default async function RootLayout({
   const data = await getMe();
   return (
     <html lang="en">
-      <Script
-        defer
-        data-domain="deepsite.hf.co"
-        src="https://plausible.io/js/script.js"
-      ></Script>
       <body
         className={`${inter.variable} ${ptSans.variable} antialiased bg-black dark h-[100dvh] overflow-hidden`}
       >

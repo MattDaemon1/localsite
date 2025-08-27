@@ -336,6 +336,7 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
         iframeRef={iframeRef}
         device={device}
         setDevice={setDevice}
+        currentHtml={html}
       />
     </section>
   );
