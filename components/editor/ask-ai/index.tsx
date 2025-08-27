@@ -22,6 +22,7 @@ import { TooltipContent } from "@radix-ui/react-tooltip";
 import { SelectedHtmlElement } from "./selected-html-element";
 import { FollowUpTooltip } from "./follow-up-tooltip";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
+import { getApiEndpoint, getDefaultProvider, getDefaultModel } from "@/lib/client-config";
 
 export function AskAI({
   html,
@@ -56,8 +57,8 @@ export function AskAI({
   const [prompt, setPrompt] = useState("");
   const [hasAsked, setHasAsked] = useState(false);
   const [previousPrompt, setPreviousPrompt] = useState("");
-  const [provider, setProvider] = useLocalStorage("provider", "auto");
-  const [model, setModel] = useLocalStorage("model", MODELS[0].value);
+  const [provider, setProvider] = useLocalStorage("provider", getDefaultProvider());
+  const [model, setModel] = useLocalStorage("model", getDefaultModel());
   const [openProvider, setOpenProvider] = useState(false);
   const [providerError, setProviderError] = useState("");
   const [openProModal, setOpenProModal] = useState(false);
@@ -92,7 +93,7 @@ export function AskAI({
         const selectedElementHtml = selectedElement
           ? selectedElement.outerHTML
           : "";
-        const request = await fetch("/api/ask-ai", {
+        const request = await fetch(getApiEndpoint("/api/ask-ai"), {
           method: "PUT",
           body: JSON.stringify({
             prompt,
@@ -133,7 +134,7 @@ export function AskAI({
           if (audio.current) audio.current.play();
         }
       } else {
-        const request = await fetch("/api/ask-ai", {
+        const request = await fetch(getApiEndpoint("/api/ask-ai"), {
           method: "POST",
           body: JSON.stringify({
             prompt,

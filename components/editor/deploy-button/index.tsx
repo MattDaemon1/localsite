@@ -35,6 +35,12 @@ export function DeployButton({
     title: "",
   });
 
+  // Ne pas afficher le bouton de déploiement en mode local
+  const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+  if (isLocalMode) {
+    return null;
+  }
+
   const createSpace = async () => {
     if (!config.title) {
       toast.error("Please enter a title for your space.");

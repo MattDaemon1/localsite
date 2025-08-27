@@ -25,6 +25,12 @@ export default function AppContext({
   const router = useRouter();
 
   useMount(() => {
+    // En mode local, ne pas gérer l'authentification
+    const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+    if (isLocalMode) {
+      return;
+    }
+    
     if (!initialData?.user && !user) {
       if ([401, 403].includes(errCode as number)) {
         logout();

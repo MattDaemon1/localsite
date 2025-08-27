@@ -19,6 +19,13 @@ export const LoginModal = ({
 }) => {
   const { openLoginWindow } = useUser();
   const [, setStorage] = useLocalStorage("html_content");
+  
+  // Ne jamais afficher le modal de login en mode local
+  const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+  if (isLocalMode) {
+    return null;
+  }
+  
   const handleClick = async () => {
     if (html && !isTheSameHtml(html)) {
       setStorage(html);

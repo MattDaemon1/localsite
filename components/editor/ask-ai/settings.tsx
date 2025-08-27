@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PROVIDERS, MODELS } from "@/lib/providers";
+import { useOllamaModels } from "@/hooks/useOllamaModels";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -41,15 +42,18 @@ export function Settings({
   onChange: (provider: string) => void;
   onModelChange: (model: string) => void;
 }) {
+  const { models: dynamicModels, loading: modelsLoading, error: modelsError, isLocalMode } = useOllamaModels();
+  const displayModels = dynamicModels.length > 0 ? dynamicModels : MODELS;
+  
   const modelAvailableProviders = useMemo(() => {
-    const availableProviders = MODELS.find(
+    const availableProviders = displayModels.find(
       (m: { value: string }) => m.value === model
     )?.providers;
     if (!availableProviders) return Object.keys(PROVIDERS);
     return Object.keys(PROVIDERS).filter((id) =>
       availableProviders.includes(id)
     );
-  }, [model]);
+  }, [model, displayModels]);
 
   useUpdateEffect(() => {
     if (provider !== "auto" && !modelAvailableProviders.includes(provider)) {
@@ -81,16 +85,19 @@ export function Settings({
             )}
             <label className="block">
               <p className="text-neutral-300 text-sm mb-2.5">
-                Choose a model
+                Choose a model {isLocalMode && "(Local)"}
               </p>
+              {modelsError && (
+                <p className="text-amber-500 text-xs mb-2">{modelsError}</p>
+              )}
               <Select defaultValue={model} onValueChange={onModelChange}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a model" />
+                  <SelectValue placeholder={modelsLoading ? "Loading models..." : "Select a model"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Models</SelectLabel>
-                    {MODELS.map(
+                    <SelectLabel>{isLocalMode ? "Ollama Models" : "Models"}</SelectLabel>
+                    {displayModels.map(
                       ({
                         value,
                         label,

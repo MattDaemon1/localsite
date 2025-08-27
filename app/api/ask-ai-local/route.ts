@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
           },
         ];
 
-        // Utiliser Ollama ou un autre provider local
-        if (provider === "ollama" || !provider) {
+        // Utiliser Ollama par défaut en mode local
+        if (provider === "ollama" || provider === "auto" || !provider) {
           const ollamaResponse = await callOllama(messages, model, true);
           const reader = ollamaResponse.body?.getReader();
           
@@ -232,7 +232,7 @@ export async function PUT(request: NextRequest) {
 
     let chunk = "";
     
-    if (provider === "ollama" || !provider) {
+    if (provider === "ollama" || provider === "auto" || !provider) {
       const ollamaResponse = await callOllama(messages, model, false);
       const responseData = await ollamaResponse.json();
       chunk = responseData.message?.content || "";

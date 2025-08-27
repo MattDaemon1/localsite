@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+  <path d="M12 11.5L7.5 7v10c0 2.48 1.51 4.62 3.67 5.53L12 11.5z" fill="#fff" opacity="0.3"/>
+  <path d="M12 11.5l4.5-4.5v10c0 2.48-1.51 4.62-3.67 5.53L12 11.5z" fill="#fff" opacity="0.5"/>
+</svg>

@@ -7,6 +7,18 @@ import dbConnect from "@/lib/mongodb";
 import { COLORS, getPTag } from "@/lib/utils";
 // import type user
 export async function GET() {
+  // En mode local, retourner une liste vide de projets
+  if (process.env.LOCAL_MODE === "true") {
+    return NextResponse.json(
+      {
+        ok: true,
+        projects: [],
+        message: "Projects are not available in local mode"
+      },
+      { status: 200 }
+    );
+  }
+
   const user = await isAuthenticated();
 
   if (user instanceof NextResponse || !user) {
@@ -44,6 +56,17 @@ export async function GET() {
  * It requires an Authorization header with a valid token and a JSON body with the project details.
  */
 export async function POST(request: NextRequest) {
+  // En mode local, empêcher la création de projets
+  if (process.env.LOCAL_MODE === "true") {
+    return NextResponse.json(
+      { 
+        ok: false,
+        error: "Project creation is not available in local mode"
+      },
+      { status: 400 }
+    );
+  }
+
   const user = await isAuthenticated();
 
   if (user instanceof NextResponse || !user) {

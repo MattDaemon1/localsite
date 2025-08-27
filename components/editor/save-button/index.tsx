@@ -21,6 +21,12 @@ export function SaveButton({
     repoId: string;
   }>();
   const [loading, setLoading] = useState(false);
+  
+  // Ne pas afficher le bouton de sauvegarde en mode local
+  const isLocalMode = process.env.NEXT_PUBLIC_LOCAL_MODE === "true";
+  if (isLocalMode) {
+    return null;
+  }
 
   const updateSpace = async () => {
     setLoading(true);
