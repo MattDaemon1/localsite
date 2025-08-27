@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FaMobileAlt } from "react-icons/fa";
-import { HelpCircle, RefreshCcw, SparkleIcon, Download } from "lucide-react";
+import { HelpCircle, RefreshCcw, SparkleIcon } from "lucide-react";
 import { FaLaptopCode } from "react-icons/fa6";
 import { HtmlHistory } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,6 @@ import { MdAdd } from "react-icons/md";
 import { History } from "@/components/editor/history";
 import { UserMenu } from "@/components/user-menu";
 import { useUser } from "@/hooks/useUser";
-import { downloadProjectAsZip } from "@/lib/download-utils";
-import { toast } from "sonner";
 
 const DEVICES = [
   {
@@ -52,21 +50,6 @@ export function Footer({
     }
   };
 
-  const handleDownloadProject = async () => {
-    if (!currentHtml || currentHtml.trim() === '') {
-      toast.error('No project to download. Generate some content first!');
-      return;
-    }
-    
-    try {
-      const projectName = `localsite-project-${new Date().toISOString().split('T')[0]}`;
-      await downloadProjectAsZip(currentHtml, projectName);
-      toast.success('Project downloaded successfully! 📦');
-    } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Failed to download project. Please try again.');
-    }
-  };
 
   return (
     <footer className="border-t bg-slate-200 border-slate-300 dark:bg-neutral-950 dark:border-neutral-800 px-3 py-2 flex items-center justify-between sticky bottom-0 z-20">
@@ -115,10 +98,6 @@ export function Footer({
         <Button size="sm" variant="outline" onClick={handleRefreshIframe}>
           <RefreshCcw className="size-3.5" />
           <span className="max-lg:hidden">Refresh Preview</span>
-        </Button>
-        <Button size="sm" variant="default" onClick={handleDownloadProject}>
-          <Download className="size-3.5" />
-          <span className="max-lg:hidden">Download ZIP</span>
         </Button>
         <div className="flex items-center rounded-full p-0.5 bg-neutral-700/70 relative overflow-hidden z-0 max-lg:hidden gap-0.5">
           <div

@@ -25,6 +25,7 @@ import { DeployButton } from "./deploy-button";
 import { Project } from "@/types";
 import { SaveButton } from "./save-button";
 import { LoadProject } from "../my-projects/load-project";
+import { DownloadButton } from "./download-button";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
 
 export const AppEditor = ({ project }: { project?: Project | null }) => {
@@ -184,6 +185,7 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
             toast.success(`Project "${project.title}" loaded successfully!`);
           }}
         />
+        <DownloadButton html={html} />
         {project?._id ? (
           <SaveButton html={html} prompts={prompts} />
         ) : (
