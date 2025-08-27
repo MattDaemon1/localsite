@@ -2,6 +2,23 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  // En mode local, retourner un utilisateur fictif
+  if (process.env.LOCAL_MODE === "true") {
+    return NextResponse.json(
+      {
+        user: {
+          id: "local-user",
+          name: "Local User",
+          preferred_username: "local",
+          avatar: null,
+          isLocalMode: true,
+        },
+        errCode: null,
+      },
+      { status: 200 }
+    );
+  }
+
   const authHeaders = await headers();
   const token = authHeaders.get("Authorization");
   if (!token) {
