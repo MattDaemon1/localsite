@@ -147,3 +147,120 @@ export function downloadHtmlFile(html: string, filename: string = 'website.html'
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   saveAs(blob, filename);
 }
+
+/**
+ * Reads a ZIP file and extracts project files
+ * @param file - The ZIP file to read
+ * @returns Promise with the extracted HTML content
+ */
+export async function readProjectZip(file: File): Promise<string> {
+  const zip = new JSZip();
+  const zipContent = await zip.loadAsync(file);
+  
+  // Look for HTML files
+  const htmlFiles = Object.keys(zipContent.files).filter(fileName => 
+    fileName.endsWith('.html') && !zipContent.files[fileName].dir
+  );
+  
+  if (htmlFiles.length === 0) {
+    throw new Error('No HTML files found in the ZIP archive');
+  }
+  
+  // Prioritize index.html if it exists, otherwise take the first HTML file
+  const mainHtmlFile = htmlFiles.find(f => f.includes('index.html')) || htmlFiles[0];
+  const htmlContent = await zipContent.files[mainHtmlFile].async('string');
+  
+  // Extract CSS and JS files and inline them back
+  const cssFiles = Object.keys(zipContent.files).filter(fileName => 
+    fileName.endsWith('.css') && !zipContent.files[fileName].dir
+  );
+  
+  const jsFiles = Object.keys(zipContent.files).filter(fileName => 
+    fileName.endsWith('.js') && !zipContent.files[fileName].dir
+  );
+  
+  let processedHtml = htmlContent;
+  
+  // Inline CSS files
+  for (const cssFile of cssFiles) {
+    const cssContent = await zipContent.files[cssFile].async('string');
+    const fileName = cssFile.split('/').pop();
+    
+    if (processedHtml.includes(`href="${fileName}"`)) {
+      processedHtml = processedHtml.replace(
+        new RegExp(`<link[^>]*href="${fileName}"[^>]*>`, 'gi'),
+        `<style>\n${cssContent}\n</style>`
+      );
+    }
+  }
+  
+  // Inline JS files
+  for (const jsFile of jsFiles) {
+    const jsContent = await zipContent.files[jsFile].async('string');
+    const fileName = jsFile.split('/').pop();
+    
+    if (processedHtml.includes(`src="${fileName}"`)) {
+      processedHtml = processedHtml.replace(
+        new RegExp(`<script[^>]*src="${fileName}"[^>]*></script>`, 'gi'),
+        `<script>\n${jsContent}\n</script>`
+      );
+    }
+  }
+  
+  return processedHtml;
+}
+
+/**
+ * Reads files from a directory input and extracts project content
+ * @param files - FileList from directory input
+ * @returns Promise with the extracted HTML content
+ */
+export async function readProjectFolder(files: FileList): Promise<string> {
+  // Convert FileList to Array and filter for relevant files
+  const fileArray = Array.from(files);
+  
+  // Look for HTML files
+  const htmlFiles = fileArray.filter(file => 
+    file.name.endsWith('.html')
+  );
+  
+  if (htmlFiles.length === 0) {
+    throw new Error('No HTML files found in the selected folder');
+  }
+  
+  // Prioritize index.html if it exists, otherwise take the first HTML file
+  const mainHtmlFile = htmlFiles.find(f => f.name === 'index.html') || htmlFiles[0];
+  const htmlContent = await mainHtmlFile.text();
+  
+  // Extract CSS and JS files
+  const cssFiles = fileArray.filter(file => file.name.endsWith('.css'));
+  const jsFiles = fileArray.filter(file => file.name.endsWith('.js'));
+  
+  let processedHtml = htmlContent;
+  
+  // Inline CSS files
+  for (const cssFile of cssFiles) {
+    const cssContent = await cssFile.text();
+    
+    if (processedHtml.includes(`href="${cssFile.name}"`)) {
+      processedHtml = processedHtml.replace(
+        new RegExp(`<link[^>]*href="${cssFile.name}"[^>]*>`, 'gi'),
+        `<style>\n${cssContent}\n</style>`
+      );
+    }
+  }
+  
+  // Inline JS files
+  for (const jsFile of jsFiles) {
+    const jsContent = await jsFile.text();
+    
+    if (processedHtml.includes(`src="${jsFile.name}"`)) {
+      processedHtml = processedHtml.replace(
+        new RegExp(`<script[^>]*src="${jsFile.name}"[^>]*></script>`, 'gi'),
+        `<script>\n${jsContent}\n</script>`
+      );
+    }
+  }
+  
+  return processedHtml;
+}

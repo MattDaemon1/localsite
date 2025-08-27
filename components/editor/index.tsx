@@ -180,7 +180,8 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
       <Header tab={currentTab} onNewTab={setCurrentTab}>
         <LoadProject
           onSuccess={(project: Project) => {
-            router.push(`/projects/${project.space_id}`);
+            setHtml(project.html);
+            toast.success(`Project "${project.title}" loaded successfully!`);
           }}
         />
         {project?._id ? (
