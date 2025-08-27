@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:local": "next dev --turbopack",
+    "sync:upstream": "./scripts/sync-with-upstream.sh",
+    "test:local": "./scripts/test-local-mode.sh",
+    "ollama:check": "curl -s http://localhost:11434/api/tags | jq '.models[].name'"
   },
   "dependencies": {
     "@huggingface/hub": "^2.2.0",
