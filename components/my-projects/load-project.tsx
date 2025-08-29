@@ -40,24 +40,30 @@ export const LoadProject = ({
     setIsLoading(true);
     try {
       const htmlContent = await readProjectZip(file);
-      
-      // Create a mock project object
+
+      // Generate stable IDs and timestamps only on the client after user interaction
+      const now = Date.now();
+      const nowDate = new Date();
       const project: Project = {
-        _id: Date.now().toString(),
+        _id: `zip-${file.name.replace(/\W/g, '')}-${now}`,
         title: file.name.replace('.zip', ''),
         html: htmlContent,
         prompts: [],
         user_id: 'local',
-        space_id: Date.now().toString(),
-        _updatedAt: new Date(),
-        _createdAt: new Date()
+        space_id: `space-${now}`,
+        _updatedAt: nowDate,
+        _createdAt: nowDate
       };
 
       toast.success("ZIP project imported successfully!");
       setOpen(false);
       onSuccess(project);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to import ZIP file.");
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as { message?: string }).message || "Failed to import ZIP file.");
+      } else {
+        toast.error("Failed to import ZIP file.");
+      }
     } finally {
       setIsLoading(false);
       if (zipInputRef.current) {
@@ -73,24 +79,30 @@ export const LoadProject = ({
     setIsLoading(true);
     try {
       const htmlContent = await readProjectFolder(files);
-      
-      // Create a mock project object
+
+      // Generate stable IDs and timestamps only on the client after user interaction
+      const now = Date.now();
+      const nowDate = new Date();
       const project: Project = {
-        _id: Date.now().toString(),
+        _id: `folder-${now}`,
         title: 'Imported Folder Project',
         html: htmlContent,
         prompts: [],
         user_id: 'local',
-        space_id: Date.now().toString(),
-        _updatedAt: new Date(),
-        _createdAt: new Date()
+        space_id: `space-${now}`,
+        _updatedAt: nowDate,
+        _createdAt: nowDate
       };
 
       toast.success("Folder project imported successfully!");
       setOpen(false);
       onSuccess(project);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to import folder.");
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as { message?: string }).message || "Failed to import folder.");
+      } else {
+        toast.error("Failed to import folder.");
+      }
     } finally {
       setIsLoading(false);
       if (folderInputRef.current) {
@@ -171,6 +183,8 @@ export const LoadProject = ({
                   accept=".zip"
                   onChange={handleZipImport}
                   className="hidden"
+                  id="zip-upload"
+                  name="zip-upload"
                 />
                 <Button
                   variant="black"
@@ -205,11 +219,13 @@ export const LoadProject = ({
                 <input
                   ref={folderInputRef}
                   type="file"
-                  // @ts-ignore
+                  // @ts-expect-error: webkitdirectory n'est pas typé dans TypeScript, mais nécessaire pour l'import de dossier
                   webkitdirectory=""
                   multiple
                   onChange={handleFolderImport}
                   className="hidden"
+                  id="folder-upload"
+                  name="folder-upload"
                 />
                 <Button
                   variant="black"

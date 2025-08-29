@@ -13,6 +13,12 @@ import {
 } from "@/lib/prompts";
 
 const ipAddresses = new Map();
+const resetInterval = 60000; // Réinitialisation toutes les 60 secondes
+
+// Réinitialisation périodique du compteur
+setInterval(() => {
+  ipAddresses.clear();
+}, resetInterval);
 
 // Helper function to call Ollama API
 async function callOllama(messages: any[], model: string, stream = true) {
@@ -50,12 +56,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Rate limiting basé sur l'IP en mode local
-  const ip = authHeaders.get("x-forwarded-for")?.includes(",")
-    ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
-    : authHeaders.get("x-forwarded-for");
-
-  if (!process.env.LOCAL_MODE) {
+  // Rate limiting basé sur l'IP (désactivé en mode local)
+  const isLocalMode = process.env.LOCAL_MODE === 'true' || process.env.NODE_ENV === 'development';
+  
+  if (!isLocalMode) {
+    const ip = authHeaders.get("x-forwarded-for")?.includes(",")
+      ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
+      : authHeaders.get("x-forwarded-for") || 'unknown';
+    
     ipAddresses.set(ip, (ipAddresses.get(ip) || 0) + 1);
     if (ipAddresses.get(ip) > MAX_REQUESTS_PER_IP) {
       return NextResponse.json(
@@ -186,12 +194,14 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  // Rate limiting
-  const ip = authHeaders.get("x-forwarded-for")?.includes(",")
-    ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
-    : authHeaders.get("x-forwarded-for");
-
-  if (!process.env.LOCAL_MODE) {
+  // Rate limiting (désactivé en mode local)
+  const isLocalMode = process.env.LOCAL_MODE === 'true' || process.env.NODE_ENV === 'development';
+  
+  if (!isLocalMode) {
+    const ip = authHeaders.get("x-forwarded-for")?.includes(",")
+      ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
+      : authHeaders.get("x-forwarded-for") || 'unknown';
+    
     ipAddresses.set(ip, (ipAddresses.get(ip) || 0) + 1);
     if (ipAddresses.get(ip) > MAX_REQUESTS_PER_IP) {
       return NextResponse.json(

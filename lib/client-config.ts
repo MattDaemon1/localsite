@@ -32,6 +32,8 @@ export const getDefaultProvider = () => {
   return isLocalMode() ? "ollama" : "auto";
 };
 
+
 export const getDefaultModel = () => {
-  return isLocalMode() ? "deepseek-r1:7b" : "deepseek-ai/DeepSeek-V3-0324";
+  // Utiliser codellama:7b-code comme modèle par défaut pour le code
+  return isLocalMode() ? "codellama:7b-code" : "deepseek-ai/DeepSeek-V3-0324";
 };

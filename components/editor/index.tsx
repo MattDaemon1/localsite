@@ -24,7 +24,8 @@ import { AskAI } from "@/components/editor/ask-ai";
 import { DeployButton } from "./deploy-button";
 import { Project } from "@/types";
 import { SaveButton } from "./save-button";
-import { LoadProject } from "../my-projects/load-project";
+import dynamic from "next/dynamic";
+const LoadProject = dynamic(() => import("../my-projects/load-project").then(mod => mod.LoadProject), { ssr: false });
 import { DownloadButton } from "./download-button";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
 

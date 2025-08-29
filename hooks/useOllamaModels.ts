@@ -44,8 +44,8 @@ export const useOllamaModels = () => {
       } catch (err) {
         console.error("Error fetching Ollama models:", err);
         setError("Impossible de récupérer les modèles Ollama. Vérifiez qu'Ollama est lancé.");
-        // Fallback aux modèles locaux prédéfinis
-        setModels(MODELS.filter(m => m.isLocal));
+        // Pas de fallback - afficher seulement les modèles réellement disponibles
+        setModels([]);
       } finally {
         setLoading(false);
       }
