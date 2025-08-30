@@ -1,10 +1,3 @@
-  {
-    value: "codellama:7b-code",
-    label: "CodeLlama 7B Code (Local)",
-    providers: ["ollama"],
-    autoProvider: "ollama",
-    isLocal: true,
-  },
 export const PROVIDERS = {
   "fireworks-ai": {
     name: "Fireworks AI",
@@ -57,6 +50,13 @@ export const PROVIDERS = {
 };
 
 export const MODELS = [
+    {
+    value: "codellama:7b-code",
+    label: "CodeLlama 7B Code (Local)",
+    providers: ["ollama"],
+    autoProvider: "ollama",
+    isLocal: true,
+  },
   {
     value: "deepseek-ai/DeepSeek-V3-0324",
     label: "DeepSeek V3 O324",
