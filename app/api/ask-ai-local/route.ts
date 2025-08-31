@@ -25,17 +25,26 @@ async function callOllama(messages: any[], model: string, stream = true) {
   const baseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
   const endpoint = stream ? "/api/chat" : "/api/chat";
   console.log('OLLAMA_BASE_URL utilisé:', baseUrl);
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: model || process.env.OLLAMA_MODEL || "deepseek-r1:7b",
-      messages,
-      stream,
-    }),
-  });
+  // Timeout de 10 minutes (600000 ms)
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 600000);
+  let response;
+  try {
+    response = await fetch(`${baseUrl}${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: model || process.env.OLLAMA_MODEL || "deepseek-r1:7b",
+        messages,
+        stream,
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     throw new Error(`Ollama API error: ${response.statusText}`);
