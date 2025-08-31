@@ -24,7 +24,7 @@ setInterval(() => {
 async function callOllama(messages: any[], model: string, stream = true) {
   const baseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
   const endpoint = stream ? "/api/chat" : "/api/chat";
-  
+  console.log('OLLAMA_BASE_URL utilisé:', baseUrl);
   const response = await fetch(`${baseUrl}${endpoint}`, {
     method: "POST",
     headers: {
@@ -47,7 +47,25 @@ async function callOllama(messages: any[], model: string, stream = true) {
 export async function POST(request: NextRequest) {
   const authHeaders = await headers();
   const body = await request.json();
-  const { prompt, provider, model, redesignMarkdown, html } = body;
+  console.log('BODY REÇU', body);
+  // Liste des modèles locaux compatibles Ollama (à adapter si besoin)
+  const LOCAL_MODELS = [
+    'qwen3:4b',
+    'codellama:7b-code',
+    'llama2:7b',
+    'mistral:7b-instruct',
+    'deepseek-r1:7b',
+    'deepseek-r1:14b',
+    'deepseek-r1:32b',
+    // Ajoute ici d'autres modèles locaux si besoin
+  ];
+  let { model } = body;
+  const { prompt, provider, redesignMarkdown, html } = body;
+  if (!LOCAL_MODELS.includes(model)) {
+    // Si le modèle n'est pas local, on force qwen3:4b (ou le modèle local par défaut)
+    console.warn(`Modèle non local reçu (${model}), utilisation forcée de qwen3:4b`);
+    model = 'qwen3:4b';
+  }
 
   if (!model || (!prompt && !redesignMarkdown)) {
     return NextResponse.json(
@@ -77,104 +95,132 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Create a stream response
-    const encoder = new TextEncoder();
-    const stream = new TransformStream();
-    const writer = stream.writable.getWriter();
+    // Debug: log all relevant variables
+    console.log('POST /api/ask-ai-local', { prompt, provider, model, redesignMarkdown, html });
+    // Si le client demande un flux (stream), on garde le comportement actuel
+    if (body.stream) {
+      console.log('Streaming mode enabled');
+      const encoder = new TextEncoder();
+      const stream = new TransformStream();
+      const writer = stream.writable.getWriter();
 
-    // Start the response
-    const response = new NextResponse(stream.readable, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
+      const response = new NextResponse(stream.readable, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
 
-    (async () => {
-      let completeResponse = "";
-      try {
-        const messages = [
-          {
-            role: "system",
-            content: INITIAL_SYSTEM_PROMPT,
-          },
-          {
-            role: "user",
-            content: redesignMarkdown
-              ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
-              : html
-              ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
-              : prompt,
-          },
-        ];
+      (async () => {
+        let completeResponse = "";
+        try {
+          const messages = [
+            {
+              role: "system",
+              content: INITIAL_SYSTEM_PROMPT,
+            },
+            {
+              role: "user",
+              content: redesignMarkdown
+                ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+                : html
+                ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
+                : prompt,
+            },
+          ];
 
-        // Utiliser Ollama par défaut en mode local
-        if (provider === "ollama" || provider === "auto" || !provider) {
-          const ollamaResponse = await callOllama(messages, model, true);
-          const reader = ollamaResponse.body?.getReader();
-          
-          if (!reader) {
-            throw new Error("No response body from Ollama");
-          }
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const text = new TextDecoder().decode(value);
-            const lines = text.split('\n');
-            
-            for (const line of lines) {
-              if (line.trim()) {
-                try {
-                  const json = JSON.parse(line);
-                  if (json.message?.content) {
-                    const chunk = json.message.content;
-                    await writer.write(encoder.encode(chunk));
-                    completeResponse += chunk;
-
-                    if (completeResponse.includes("</html>")) {
-                      break;
+          if (provider === "ollama" || provider === "auto" || !provider) {
+            let ollamaResponse;
+            try {
+              ollamaResponse = await callOllama(messages, model, true);
+            } catch (err) {
+              console.error('Error calling Ollama (stream):', err);
+              throw err;
+            }
+            const reader = ollamaResponse.body?.getReader();
+            if (!reader) throw new Error("No response body from Ollama");
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const text = new TextDecoder().decode(value);
+              const lines = text.split('\n');
+              for (const line of lines) {
+                if (line.trim()) {
+                  try {
+                    const json = JSON.parse(line);
+                    if (json.message?.content) {
+                      const chunk = json.message.content;
+                      await writer.write(encoder.encode(chunk));
+                      completeResponse += chunk;
+                      if (completeResponse.includes("</html>")) break;
                     }
+                  } catch (e) {
+                    console.error("Error parsing Ollama response:", e);
                   }
-                } catch (e) {
-                  console.error("Error parsing Ollama response:", e);
                 }
               }
+              if (completeResponse.includes("</html>")) break;
             }
-
-            if (completeResponse.includes("</html>")) {
-              break;
-            }
+          } else {
+            throw new Error(`Provider ${provider} not yet implemented`);
           }
-        } else {
-          // Support pour d'autres providers locaux comme LM Studio
-          throw new Error(`Provider ${provider} not yet implemented`);
+        } catch (error: any) {
+          await writer.write(
+            encoder.encode(
+              JSON.stringify({
+                ok: false,
+                message:
+                  error.message ||
+                  "An error occurred while processing your request.",
+              })
+            )
+          );
+        } finally {
+          await writer?.close();
         }
-      } catch (error: any) {
-        await writer.write(
-          encoder.encode(
-            JSON.stringify({
-              ok: false,
-              message:
-                error.message ||
-                "An error occurred while processing your request.",
-            })
-          )
-        );
-      } finally {
-        await writer?.close();
-      }
-    })();
+      })();
+      return response;
+    }
 
-    return response;
+    // Sinon, on renvoie une réponse JSON standard (non streamée)
+    const messages = [
+      {
+        role: "system",
+        content: INITIAL_SYSTEM_PROMPT,
+      },
+      {
+        role: "user",
+        content: redesignMarkdown
+          ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+          : html
+          ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
+          : prompt,
+      },
+    ];
+
+    if (provider === "ollama" || provider === "auto" || !provider) {
+      let ollamaResponse;
+      try {
+        ollamaResponse = await callOllama(messages, model, false);
+      } catch (err) {
+        console.error('Error calling Ollama (json):', err);
+        throw err;
+      }
+      const result = await ollamaResponse.json();
+      return NextResponse.json(result);
+    } else {
+      throw new Error(`Provider ${provider} not yet implemented`);
+    }
   } catch (error: any) {
+    // Log the full error object for debugging
+    console.error('POST /api/ask-ai-local error:', error);
     return NextResponse.json(
       {
         ok: false,
         message:
-          error?.message || "An error occurred while processing your request.",
+          error?.message || error?.toString() || "An error occurred while processing your request.",
+        stack: error?.stack || undefined,
       },
       { status: 500 }
     );
